@@ -1,7 +1,10 @@
 import csv
 import numpy as np
 import math
-
+import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.colors import LogNorm
+import copy
 
 
 class NaiveBayes:
@@ -61,6 +64,20 @@ class NaiveBayes:
         labels  = np.reshape(labels, (len(labels)))
         results = (labels == preds) * 1
         accuracy = np.sum(results) / len(results)
+
+        print('Accuracy:', accuracy)
+
+        
+        confusion = np.zeros((2,2))
+        for i in range(len(labels)):
+            j, k = int(labels[i]), preds[i]
+            confusion[j,k] += 1
+
+        my_cmap = copy.copy(matplotlib.cm.get_cmap('viridis')) # copy the default cmap
+        my_cmap.set_bad((0,0,0))
+        plt.matshow(confusion, norm=LogNorm(), interpolation='nearest', cmap=my_cmap)
+        plt.colorbar()
+        plt.show()
 
         a=5
 
