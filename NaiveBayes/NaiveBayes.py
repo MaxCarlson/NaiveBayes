@@ -24,7 +24,6 @@ class NaiveBayes:
         self.trainingData = [notSpam[0:int(len(notSpam)/2)], spam[0:int(len(spam)/2)]]
         trainingCount = len(self.trainingData[0]) + len(self.trainingData[1])
 
-        # TODO: Calculate Priors from training ONLY!!!
         # Calcualte Priors
         self.priors = [len(self.trainingData[0]) / trainingCount, 
                        len(self.trainingData[1]) / trainingCount]
@@ -54,8 +53,6 @@ class NaiveBayes:
         power = [(np.square(input - self.mean[i]) / (2 * np.square(self.std[i]))) 
                  for i in range(2)]
 
-        #t = np.exp(power[0])
-
         likelihoods = [np.log(np.exp(-power[i]) + 10e-10) * norm[i] for i in range(2)]
 
         preds = [self.priors[i] + np.sum(likelihoods[i], axis=1) for i in range(2)]
@@ -63,29 +60,35 @@ class NaiveBayes:
 
         labels  = np.reshape(labels, (len(labels)))
         results = (labels == preds) * 1
-        accuracy = np.sum(results) / len(results)
 
-        print('Accuracy:', accuracy)
+        self.confusionMatrix(preds, labels)
 
-        
+
+    def confusionMatrix(self, preds, labels):
         confusion = np.zeros((2,2))
         for i in range(len(labels)):
             j, k = int(labels[i]), preds[i]
             confusion[j,k] += 1
 
+        self.characteristics(confusion)
         my_cmap = copy.copy(matplotlib.cm.get_cmap('viridis')) # copy the default cmap
         my_cmap.set_bad((0,0,0))
         plt.matshow(confusion, norm=LogNorm(), interpolation='nearest', cmap=my_cmap)
         plt.colorbar()
         plt.show()
 
-        a=5
+    def characteristics(self, confusion):
+        tp = confusion[1,1]
+        tn = confusion[0,0]
+        fp = confusion[0,1]
+        fn = confusion[1,0]
 
-    #def prob(self, )
+        accuracy = (tp + tn) / (tp + fp + tn + fn)
+        precision = tp / (tp + fp)
+        recall = tp / (tp + fn)
 
-
-
-
-
+        print('Accuracy:', accuracy)
+        print('Precision:', precision)
+        print('Recall:', recall)
 
 NaiveBayes('spambase.data')
